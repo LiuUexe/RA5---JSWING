@@ -4,6 +4,7 @@ import Class.Student;
 import java.io.*;
 import java.util.Scanner;
 import java.util.ArrayList;
+import static jdk.jfr.FlightRecorder.register;
 
 public class StudentManager {
 
@@ -115,45 +116,42 @@ public class StudentManager {
     }
 
     //Shows all students provided by the user. If exists, its eliminated.
-    public static void deleteStudent() {
-        showStudents();
-
-        System.out.println("\n Enter DNI of the Students to Delete.");
-        String dni = Scanners.scannerLine();
-
-        ArrayList<String> studentsData = new ArrayList<>();
+    public static void deleteStudent(String dni) throws IOException {
         boolean found = false;
 
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(archive));
-            String line;
+        ArrayList<Student> updatedList = new ArrayList<>();
 
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-
-                if (!parts[4].equalsIgnoreCase(dni)) {
-                    studentsData.add(line);
-                } else {
-                    found = true;
-                }
+        for (Student student : students)
+        {
+            if (!student.getDni().equalsIgnoreCase(dni))
+            {
+                updatedList.add(student);
             }
-            br.close();
-
-            BufferedWriter bw = new BufferedWriter(new FileWriter(archive));
-            for (String student : studentsData) {
-                bw.write(student);
-                bw.newLine();
+            else
+            {
+                found = true;
             }
+        }
+
+        if (found = true)
+        {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(editFile, false));
+
+            for (Student student : updatedList)
+            {
+                bw.write(student.toString() + System.lineSeparator());
+            }
+
+            bw.flush();
             bw.close();
+            
+            students = updatedList;
 
-            if (found) {
-                System.out.println("\nStudent with DNI " + dni + " deleted successfully.");
-            } else {
-                System.out.println("\nStudent not found.");
-            }
-
-        } catch (IOException e) {
-            System.err.println("Error Processing File.");
+            System.out.println("The student was successfully deleted.");
+        }
+        else
+        {
+            System.out.println("There are no students with that DNI.");
         }
 
     }
